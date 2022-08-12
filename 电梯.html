@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="./js/jquery-3.5.1.min.js"></script>
+    <style>
+      /* //色彩变量 */
+      :root {
+        --elevatorBorderColor--: rgba(0, 0, 0.85);
+        --elevatorBtnBgColor--: #fff;
+        --elevatorBtnBgDisabledColor--: #898989;
+        --elevatorBtnDisabledColor--: #c2c3c4;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      .ew-elevator-building {
+        position: relative;
+        width: 350px;
+        max-width: 100%;
+        min-height: 500px;
+        border: 6px solid var(--elevatorBorderColor--);
+        margin: 3vh auto;
+        overflow: hidden;
+        display: flex;
+      }
+      /* 电梯井，主要就是设置相对定位和边框，固定宽度 */
+      .ew-elevator-shaft {
+        overflow: hidden;
+        border-right: 2px solid var(--elevatorBorderColor--);
+        width: 200px;
+        padding: 1px;
+        position: relative;
+      }
+      .ew-elevator {
+        height: 98px;
+        width: calc(100% - 2px);
+        background: #eee;
+        border: 1px solid var(--elevatorBorderColor--);
+        padding: 1px;
+        transition-timing-function: ease-in-out;
+        position: absolute;
+        left: 1px;
+        bottom: 1px;
+        transition-property: all;
+        transition-duration: 0.2s;
+        transition-timing-function: linear;
+        transition-delay: 0s;
+      }
+      .ew-elevator-door {
+        transition-property: all;
+        transition-duration: 0.2s;
+        transition-timing-function: linear;
+        transition-delay: 0s;
+        position: absolute;
+        width: 50%;
+        height: 100%;
+        background-color: var(--elevatorBorderColor--);
+        border: 1px solid var(--elevatorBtnBgColor--);
+        top: 0;
+      }
+
+      .ew-elevator-left-door {
+        left: 0;
+      }
+
+      .ew-elevator-right-door {
+        right: 0;
+      }
+      .ew-elevator-left-door.toggle {
+        animation: doorLeft 3s 1s cubic-bezier(0.075, 0.82, 0.165, 1);
+      }
+
+      .ew-elevator-right-door.toggle {
+        animation: doorRight 3s 1s cubic-bezier(0.075, 0.82, 0.165, 1);
+      }
+      /* //楼层容器元素 */
+      .ew-elevator-storey-zone {
+        width: auto;
+        height: 100%;
+      }
+      /* //楼层元素 */
+      .ew-elevator-storey {
+        display: flex;
+        align-items: center;
+        height: 98px;
+        border-bottom: 1px solid var(--elevatorBorderColor--);
+      }
+      .ew-elevator-controller {
+        width: 70px;
+        height: 98px;
+        padding: 8px 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+      }
+      /* //电梯按钮 */
+      .ew-elevator-btn {
+        width: 36px;
+        height: 36px;
+        border: 1px solid var(--elevatorBorderColor--);
+        border-radius: 50%;
+        outline: none;
+        cursor: pointer;
+        background-color: var(--elevatorBtnBgColor--);
+      }
+      /* //需要给按钮添加一个选中样式效果 */
+      .checked {
+        border: 1px solid red;
+        color: red;
+      }
+      /* //加点上间距 */
+      .ew-elevator-btn:last-of-type {
+        margin-top: 8px;
+      }
+      /* //按钮禁用 */
+      .ew-elevator-btn[disabled] {
+        cursor: not-allowed;
+        background-color: var(--elevatorBtnBgDisabledColor--);
+        color: var(--elevatorBtnDisabledColor--);
+      }
+      /* //楼层数样式 */
+      .ew-elevator-count {
+        width: 80px;
+        height: 98px;
+        text-align: center;
+        font: 56px / 98px '微软雅黑', '楷体';
+      }
+    </style>
+  </head>
+  <body>
+    <div class="ew-elevator-building">
+      <!--电梯井-->
+      <div class="ew-elevator-shaft">
+        <!--电梯-->
+        <div class="ew-elevator">
+          <!--电梯左右门-->
+          <div class="ew-elevator-left-door ew-elevator-door"></div>
+          <div class="ew-elevator-right-door ew-elevator-door"></div>
+        </div>
+      </div>
+      <div class="ew-elevator-storey-zone">
+        <div class="ew-elevator-storey">
+          <!--电梯按钮，包含上升按钮和下降按钮-->
+          <div class="ew-elevator-controller">
+            <button
+              type="button"
+              class="ew-elevator-to-top ew-elevator-btn"
+              onclick="upstairsBtn(event)"
+            >
+              ↑
+            </button>
+            <button
+              type="button"
+              class="ew-elevator-to-bottom ew-elevator-btn"
+              onclick="downstairsBtn(event) "
+            >
+              ↓
+            </button>
+          </div>
+          <!--楼层数-->
+          <div class="ew-elevator-count">5</div>
+        </div>
+        <div class="ew-elevator-storey">
+          <!--电梯按钮，包含上升按钮和下降按钮-->
+          <div class="ew-elevator-controller">
+            <button
+              type="button"
+              class="ew-elevator-to-top ew-elevator-btn"
+              onclick="upstairsBtn(event)"
+            >
+              ↑
+            </button>
+            <button
+              type="button"
+              class="ew-elevator-to-bottom ew-elevator-btn"
+              onclick="downstairsBtn(event) "
+            >
+              ↓
+            </button>
+          </div>
+          <!--楼层数-->
+          <div class="ew-elevator-count">4</div>
+        </div>
+        <div class="ew-elevator-storey">
+          <!--电梯按钮，包含上升按钮和下降按钮-->
+          <div class="ew-elevator-controller">
+            <button
+              type="button"
+              class="ew-elevator-to-top ew-elevator-btn"
+              onclick="upstairsBtn(event)"
+            >
+              ↑
+            </button>
+            <button
+              type="button"
+              class="ew-elevator-to-bottom ew-elevator-btn"
+              onclick="downstairsBtn(event) "
+            >
+              ↓
+            </button>
+          </div>
+          <!--楼层数-->
+          <div class="ew-elevator-count">3</div>
+        </div>
+        <div class="ew-elevator-storey">
+          <!--电梯按钮，包含上升按钮和下降按钮-->
+          <div class="ew-elevator-controller">
+            <button
+              type="button"
+              class="ew-elevator-to-top ew-elevator-btn"
+              onclick="upstairsBtn(event)"
+            >
+              ↑
+            </button>
+            <button
+              type="button"
+              class="ew-elevator-to-bottom ew-elevator-btn"
+              onclick="downstairsBtn(event) "
+            >
+              ↓
+            </button>
+          </div>
+          <!--楼层数-->
+          <div class="ew-elevator-count">2</div>
+        </div>
+        <div class="ew-elevator-storey">
+          <!--电梯按钮，包含上升按钮和下降按钮-->
+          <div class="ew-elevator-controller">
+            <button
+              type="button"
+              class="ew-elevator-to-top ew-elevator-btn"
+              onclick="upstairsBtn(event)"
+            >
+              ↑
+            </button>
+            <button
+              type="button"
+              class="ew-elevator-to-bottom ew-elevator-btn"
+              onclick="downstairsBtn(event) "
+            >
+              ↓
+            </button>
+          </div>
+          <!--楼层数-->
+          <div class="ew-elevator-count">1</div>
+        </div>
+      </div>
+    </div>
+  </body>
+  <script>
+
+    // 有bug待修复
+
+    // 待添加的功能
+    // 1. 显示当前楼层
+    // 2. 当前楼层点击按钮, 自动开门
+    const runTime = 2000 // 电梯运行时间
+    const openDoorTime = 500 // 开门时间
+    const closeDoorTime = 500 // 关门时间
+    let currentStorey = 1 // 当前楼层
+    let clientStoreyArr = [
+      // {
+      //   value: 5,
+      //   direction: 'up'
+      // },
+      // {
+      //   value: 3,
+      //   direction: 'up'
+      // },
+      // {
+      //   value: 2,
+      //   direction: 'down'
+      // },
+      // {
+      //   value: 1,
+      //   direction: 'down'
+      // }
+    ] // 客户点击的楼层
+    let nextStorey = null // 电梯下一次到的楼层
+    let elevatorDoor = true // 电梯门是否开启
+    let elevatorDirection = 'up'
+
+    // 上按钮
+    function upstairsBtn(e) {
+      const parentNode = e.target.parentNode.parentNode
+      // 楼层
+      const count = $(parentNode).find('.ew-elevator-count').text()
+      let obj = {
+        direction: 'up',
+        value: count
+      }
+      let exist = clientStoreyArr.find((item) => {
+        return item.value === obj.value && item.direction === obj.direction
+      })
+      if (!exist) {
+        clientStoreyArr.push(obj)
+        $(e.target).addClass('checked')
+      }
+    }
+    //下按钮
+    function downstairsBtn(e) {
+      const parentNode = e.target.parentNode.parentNode
+      // 楼层
+      const count = $(parentNode).find('.ew-elevator-count').text()
+      let obj = {
+        direction: 'down',
+        value: count
+      }
+      let exist = clientStoreyArr.find((item) => {
+        return item.value === obj.value && item.direction === obj.direction
+      })
+      if (!exist) {
+        clientStoreyArr.push(obj)
+        $(e.target).addClass('checked')
+      }
+    }
+
+    function init() {
+      console.log('run')
+      // 电梯的规则
+      // 0. 没有人按电梯, 电梯停止
+      // 1. 电梯朝一个方向运行, 到达底层或顶层后, 换方向
+      // 2. 电梯到达指定层会打开门, 消除按键指示, 然后关门后在运转.
+      //
+      if (clientStoreyArr.length == 0 && nextStorey === null) {
+        // 电梯停止
+        return
+      }
+      // 电梯下个楼层为空, 查找客户点击楼层
+      if (!nextStorey) {
+        nextStorey = findRunStorey()
+      }
+      // 电梯运行指定楼层
+      start()
+    }
+    function start() {
+      // 视图显示指定楼层
+      runAnimation()
+      currentStorey = nextStorey
+      // 清除电梯下一步到达的楼层
+      nextStorey = null
+    }
+    function runAnimation() {
+      // 电梯上下移动
+      // 开关门
+      // 到达的楼层清除按钮
+      const height = 98
+      const removePx = `${height * (nextStorey - 1)}px`
+      $('.ew-elevator').css('bottom', removePx)
+
+      let nextStoreyObj = {
+        direction: elevatorDirection,
+        value: nextStorey
+      }
+      // 清除按钮指示
+      removeBtnClass(nextStoreyObj)
+
+      // 开关门动画
+      setTimeout(() => {
+        $('.ew-elevator-left-door').css('left', '-92px')
+        $('.ew-elevator-right-door').css('right', '-92px')
+        setTimeout(() => {
+          $('.ew-elevator-left-door').css('left', '0px')
+          $('.ew-elevator-right-door').css('right', '0px')
+        }, closeDoorTime)
+      }, openDoorTime)
+    }
+    function findRunStorey() {
+      // 返回下一次到达的楼层
+      if (clientStoreyArr.length == 0) {
+        return null
+      }
+      let index = -1
+      // 只有有人点击楼层, 下一次移动的楼层index
+      if (elevatorDirection == 'up') {
+        index = findUpstairsIndex()
+        elevatorDirection = index === -1 ? 'down' : 'up'
+      } else {
+        index = findDownstairsIdenx()
+        elevatorDirection = index === -1 ? 'up' : 'down'
+      }
+      // 向上查找一次没有结果, 反向查找一次
+      if (index === -1 && clientStoreyArr.length !== 0) {
+        if (elevatorDirection == 'down') {
+          index = findDownstairsIdenx()
+        } else {
+          index = findUpstairsIndex()
+        }
+      }
+      return clientStoreyArr.splice(index, 1)[0].value
+    }
+    function findUpstairsIndex() {
+      let index = -1
+      if (elevatorDirection == 'up') {
+        // 找出向上方向和在当前楼层之上的层数
+        let arr = clientStoreyArr.filter(
+          (item) => item.direction === 'up' && item.value > currentStorey
+        )
+        if (arr.length > 0) {
+          // 楼层小到大排序
+          arr = arr.sort((a, b) => a.value - b.value)
+          index = clientStoreyArr.findIndex((item) => {
+            // 电梯上行的时候
+            return item.value === arr[0].value
+          })
+        }
+        return index
+      }
+    }
+    function findDownstairsIdenx() {
+      let index = -1
+      if (elevatorDirection == 'down') {
+        // 找出向下方向和在当前楼层之下的层数
+        let arr = clientStoreyArr.filter(
+          (item) => item.direction === 'down' && item.value < currentStorey
+        )
+        if (arr.length > 0) {
+          // 楼层小到大排序
+          arr = arr.sort((a, b) => b.value - a.value)
+          index = clientStoreyArr.findIndex((item) => {
+            // 电梯上行的时候
+            return item.value === arr[0].value
+          })
+        }
+        return index
+      }
+    }
+    function removeBtnClass(obj) {
+      const el = Array.from($('.ew-elevator-count')).find((item) => {
+        return item.innerHTML == obj.value
+      })
+      console.log("🚀 ~ el ~ el", $(el.parentNode).find('.ew-elevator-to-top'))
+
+      if (obj.direction === 'up') {
+        $(el.parentNode).find('.ew-elevator-to-top').removeClass('checked')
+      }else{
+        $(el.parentNode).find('.ew-elevator-to-bottom').removeClass('checked')
+      }
+    }
+    setInterval(init, runTime)
+  </script>
+</html>
